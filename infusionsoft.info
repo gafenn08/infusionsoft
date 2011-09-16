@@ -3,6 +3,8 @@ description = This is an example of how to use drupal to communicate with infusi
 package = Infusionsoft  
 core = 7.x
 
+dependencies[] = quicktabs
+
 files[] = infusionsoft.module
 files[] = infusionsoft.install
 files[] = InfusionsoftData.inc

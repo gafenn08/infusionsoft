@@ -84,7 +84,28 @@ function infusionsoft_menu() {
 	  'access callback' => TRUE,	
 	  'file' => 'infusionsoft_edit_contact.inc',	       
 	  'type' => MENU_CALLBACK,  	
-	);  	
+	);
+	 $items['infusionsoft/level-one-students'] = array(
+	  'title' => 'Level One Students',
+	  'page callback' => 'infusionsoft_get_level_one_students', 
+	  'access arguments' => array('administer contacts'), 
+	  'file' => 'infusionsoft_edit_contact.inc',	       
+	  'type' => MENU_CALLBACK,  	
+	);
+	 $items['infusionsoft/level-two-students'] = array(
+	  'title' => 'Level One Students',
+	  'page callback' => 'infusionsoft_get_level_two_students', 
+	  'access arguments' => array('administer contacts'), 
+	  'file' => 'infusionsoft_edit_contact.inc',	       
+	  'type' => MENU_CALLBACK,  	
+	); 	 
+	 $items['infusionsoft/level-three-students'] = array(
+	  'title' => 'Level One Students',
+	  'page callback' => 'infusionsoft_get_level_three_students', 
+	  'access arguments' => array('administer contacts'), 
+	  'file' => 'infusionsoft_edit_contact.inc',	       
+	  'type' => MENU_CALLBACK,  	
+	); 
   return $items;
 }
 
@@ -149,10 +170,43 @@ function infusionsoft_settings_submit($form, &$form_state){
 
 function infusionsoft_dashboard() {
 	$id = get_current_teacher_id();
-
+	$level_one = infusionsoft_get_level_one_students();
+	$level_two = infusionsoft_get_level_two_students();
+	$level_three = infusionsoft_get_level_three_students();
+	$graduated = infusionsoft_get_graduated_students();
+	$dropped = infusionsoft_get_dropped_students();	
 	if($id !== ""){
 	$output = drupal_render(drupal_get_form('infusionsoft_teacher_form'));
-	$output .= infusionsoft_get_students($id);
+	//$output .= infusionsoft_get_students($id);
+	$overrides = array('ajax' => 0, 'style' => 'Basic');
+	$custom_tabs = array(
+	  array(
+	    'title' => 'Level One',
+	    'contents' =>  $level_one,
+	    'weight' => 0,
+	  ),
+	  array(
+	    'title' => 'Level Two',
+	    'contents' =>  $level_two,
+	    'weight' => 1,
+	  ),
+	  array(
+	    'title' => 'Level Three',
+	    'contents' =>  $level_three,
+	    'weight' => 2,
+	  ),
+	  array(
+	    'title' => 'Graduated',
+	    'contents' =>  $graduated,
+	    'weight' => 3,
+	  ),
+	  array(
+	    'title' => 'Dropped',
+	    'contents' =>  $dropped,
+	    'weight' => 4,
+	  ),	  
+	);
+	$output .= render(quicktabs_build_quicktabs('students', $overrides, $custom_tabs));
 
 	return $output;
 	}
@@ -160,14 +214,14 @@ return drupal_goto("infusionsoft/roster-issues");
 }
 
 
-function infusionsoft_get_students($teacher_id){
-	
+function infusionsoft_get_level_one_students(){
+    $teacher_id = get_current_teacher_id();
 
-    $tableColumns = array('Name','Gender', 'Birthday', 'Level', 'Status', 'Parent' );
+    $tableColumns = array('Name','Gender', 'Birthday', 'Parent' );
     $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop');
     $infusionsoft_data = new InfusionsoftData();
 
-    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student'), $fieldsToReturn);
+    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student', '_StudentLevel' => 'Level One', '_StudentStatus' => 'In Class'), $fieldsToReturn);
     $html = '<h1>Student Roster is still under development. If you are having issues please fill out '. l('this form', 'infusionsoft/roster-issues', array('query' => array('destination' => 'infusionsoft'))).'</h1>';
     //TODO ADD LEVEL 2, LEVEL 3 TABLES $html .= '<div class="student-level-links"';
 
@@ -182,10 +236,6 @@ function infusionsoft_get_students($teacher_id){
 	      $newArray[$fieldName] = $result['_Gender0'];
 	    }elseif($fieldName=='Birthday' && isset($result['Birthday'])) {
 	      $newArray[$fieldName] = date('D, M jS Y',strtotime($result['Birthday']));
-	    }elseif($fieldName=='Level' && isset($result['_StudentLevel'])) {
-	      $newArray[$fieldName] = $result['_StudentLevel'];
-	    }elseif($fieldName=='Status' && isset($result['_StudentStatus'])) {
-	      $newArray[$fieldName] = $result['_StudentStatus'];
 	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
                 $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
             } else{
@@ -200,8 +250,6 @@ function infusionsoft_get_students($teacher_id){
             'Name',
 	    'Gender',
             'Birthday',
-	    'Level',
-	    'Status',
 	    'Parent'
         ),
         'rows' => $filteredRecords,
@@ -217,6 +265,210 @@ function infusionsoft_get_students($teacher_id){
 	return $html;
 }
 
+
+function infusionsoft_get_level_two_students(){
+    $teacher_id = get_current_teacher_id();
+
+    $tableColumns = array('Name','Gender', 'Birthday', 'Parent' );
+    $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop');
+    $infusionsoft_data = new InfusionsoftData();
+
+    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student', '_StudentLevel' => 'Level Two', '_StudentStatus' => 'In Class'), $fieldsToReturn);
+    $html = '<h1>Student Roster is still under development. If you are having issues please fill out '. l('this form', 'infusionsoft/roster-issues', array('query' => array('destination' => 'infusionsoft'))).'</h1>';
+    //TODO ADD LEVEL 2, LEVEL 3 TABLES $html .= '<div class="student-level-links"';
+
+    //Infusionsoft doesn't return fields in the order you specify, so we need to re-order them before putting them into the table...
+    $filteredRecords = array();
+    foreach($infusionsoft_results as $result){
+        $newArray = array();
+        foreach($tableColumns as $fieldName){
+            if($fieldName == 'Name' && isset($result['FirstName']) && isset($result['LastName'])){
+                $newArray[$fieldName] = l($result['FirstName'] . ' ' .  $result['LastName'], 'infusionsoft/student/' . $result['Id']);
+            }elseif($fieldName=='Gender' && isset($result['_Gender0'])) {
+	      $newArray[$fieldName] = $result['_Gender0'];
+	    }elseif($fieldName=='Birthday' && isset($result['Birthday'])) {
+	      $newArray[$fieldName] = date('D, M jS Y',strtotime($result['Birthday']));
+	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
+                $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
+            } else{
+                $newArray[$fieldName] = '';
+            }
+        }
+        $filteredRecords[] = $newArray;
+    }
+
+    $table_variables = array(
+        'header' => array(
+            'Name',
+	    'Gender',
+            'Birthday',
+	    'Parent'
+        ),
+        'rows' => $filteredRecords,
+        'attributes' => array('id' => array('students')),
+        'caption' => '',
+        'colgroups' => array(),
+        'sticky' => '',
+        'empty' => ''
+    );
+    
+    $html .= theme_table($table_variables);
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+	return $html;
+}
+function infusionsoft_get_level_three_students(){
+    $teacher_id = get_current_teacher_id();
+
+    $tableColumns = array('Name','Gender', 'Birthday','Parent' );
+    $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop');
+    $infusionsoft_data = new InfusionsoftData();
+
+    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student', '_StudentLevel' => 'Level Three', '_StudentStatus' => 'In Class'), $fieldsToReturn);
+    $html = '<h1>Student Roster is still under development. If you are having issues please fill out '. l('this form', 'infusionsoft/roster-issues', array('query' => array('destination' => 'infusionsoft'))).'</h1>';
+    //TODO ADD LEVEL 2, LEVEL 3 TABLES $html .= '<div class="student-level-links"';
+
+    //Infusionsoft doesn't return fields in the order you specify, so we need to re-order them before putting them into the table...
+    $filteredRecords = array();
+    foreach($infusionsoft_results as $result){
+        $newArray = array();
+        foreach($tableColumns as $fieldName){
+            if($fieldName == 'Name' && isset($result['FirstName']) && isset($result['LastName'])){
+                $newArray[$fieldName] = l($result['FirstName'] . ' ' .  $result['LastName'], 'infusionsoft/student/' . $result['Id']);
+            }elseif($fieldName=='Gender' && isset($result['_Gender0'])) {
+	      $newArray[$fieldName] = $result['_Gender0'];
+	    }elseif($fieldName=='Birthday' && isset($result['Birthday'])) {
+	      $newArray[$fieldName] = date('D, M jS Y',strtotime($result['Birthday']));
+	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
+                $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
+            } else{
+                $newArray[$fieldName] = '';
+            }
+        }
+        $filteredRecords[] = $newArray;
+    }
+
+    $table_variables = array(
+        'header' => array(
+            'Name',
+	    'Gender',
+            'Birthday',
+	    'Parent'
+        ),
+        'rows' => $filteredRecords,
+        'attributes' => array('id' => array('students')),
+        'caption' => '',
+        'colgroups' => array(),
+        'sticky' => '',
+        'empty' => ''
+    );
+    
+    $html .= theme_table($table_variables);
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+	return $html;
+}
+function infusionsoft_get_graduated_students(){
+    $teacher_id = get_current_teacher_id();
+
+    $tableColumns = array('Name','Gender', 'Birthday','Parent' );
+    $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop');
+    $infusionsoft_data = new InfusionsoftData();
+
+    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student', '_StudentLevel' => 'Graduated','_StudentStatus' => 'Graduated'), $fieldsToReturn);
+    $html = '<h1>Student Roster is still under development. If you are having issues please fill out '. l('this form', 'infusionsoft/roster-issues', array('query' => array('destination' => 'infusionsoft'))).'</h1>';
+    //TODO ADD LEVEL 2, LEVEL 3 TABLES $html .= '<div class="student-level-links"';
+
+    //Infusionsoft doesn't return fields in the order you specify, so we need to re-order them before putting them into the table...
+    $filteredRecords = array();
+    foreach($infusionsoft_results as $result){
+        $newArray = array();
+        foreach($tableColumns as $fieldName){
+            if($fieldName == 'Name' && isset($result['FirstName']) && isset($result['LastName'])){
+                $newArray[$fieldName] = l($result['FirstName'] . ' ' .  $result['LastName'], 'infusionsoft/student/' . $result['Id']);
+            }elseif($fieldName=='Gender' && isset($result['_Gender0'])) {
+	      $newArray[$fieldName] = $result['_Gender0'];
+	    }elseif($fieldName=='Birthday' && isset($result['Birthday'])) {
+	      $newArray[$fieldName] = date('D, M jS Y',strtotime($result['Birthday']));
+	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
+                $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
+            } else{
+                $newArray[$fieldName] = '';
+            }
+        }
+        $filteredRecords[] = $newArray;
+    }
+
+    $table_variables = array(
+        'header' => array(
+            'Name',
+	    'Gender',
+            'Birthday',
+	    'Parent'
+        ),
+        'rows' => $filteredRecords,
+        'attributes' => array('id' => array('students')),
+        'caption' => '',
+        'colgroups' => array(),
+        'sticky' => '',
+        'empty' => ''
+    );
+    
+    $html .= theme_table($table_variables);
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+	return $html;
+}
+function infusionsoft_get_dropped_students(){
+    $teacher_id = get_current_teacher_id();
+
+    $tableColumns = array('Name','Gender', 'Birthday', 'Reason For Drop','Parent' );
+    $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop');
+    $infusionsoft_data = new InfusionsoftData();
+
+    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student', '_StudentStatus' => 'Dropped' ), $fieldsToReturn);
+    $html = '<h1>Student Roster is still under development. If you are having issues please fill out '. l('this form', 'infusionsoft/roster-issues', array('query' => array('destination' => 'infusionsoft'))).'</h1>';
+    //TODO ADD LEVEL 2, LEVEL 3 TABLES $html .= '<div class="student-level-links"';
+
+    //Infusionsoft doesn't return fields in the order you specify, so we need to re-order them before putting them into the table...
+    $filteredRecords = array();
+    foreach($infusionsoft_results as $result){
+        $newArray = array();
+        foreach($tableColumns as $fieldName){
+            if($fieldName == 'Name' && isset($result['FirstName']) && isset($result['LastName'])){
+                $newArray[$fieldName] = l($result['FirstName'] . ' ' .  $result['LastName'], 'infusionsoft/student/' . $result['Id']);
+            }elseif($fieldName=='Gender' && isset($result['_Gender0'])) {
+	      $newArray[$fieldName] = $result['_Gender0'];
+	    }elseif($fieldName=='Birthday' && isset($result['Birthday'])) {
+	      $newArray[$fieldName] = date('D, M jS Y',strtotime($result['Birthday']));
+	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
+                $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
+            }elseif($fieldName=='Reason For Drop' && isset($result['_ReasonforDrop'])){
+               $newArray[$fieldName] = $result['_ReasonforDrop'];
+            }else{
+                $newArray[$fieldName] = '';
+            }
+        }
+        $filteredRecords[] = $newArray;
+    }
+
+    $table_variables = array(
+        'header' => array(
+            'Name',
+	    'Gender',
+            'Birthday',
+	    'Reason For Drop',
+	    'Parent'
+        ),
+        'rows' => $filteredRecords,
+        'attributes' => array('id' => array('students')),
+        'caption' => '',
+        'colgroups' => array(),
+        'sticky' => '',
+        'empty' => ''
+    );
+    
+    $html .= theme_table($table_variables);
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+	return $html;
+}
 function infusionsoft_get_parents($parent_id){
     $infusionsoft_data = new InfusionsoftData();
     $infusionsoft_results = $infusionsoft_data->query('Contact', array('_ParentID' => $parent_id));
