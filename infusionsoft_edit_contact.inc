@@ -217,8 +217,9 @@ function infusionsoft_student_form($form, &$form_state, $id){
     $month = $fields['Birthday']->month;
   	$day = $fields['Birthday']->day;
    // dsm($fields['Birthday']);
-	$date = array('year' => (int)$year, 'month' => (int)$month, 'day' => (int)$day);
-	$form = array();   
+    $date = array('year' => (int)$year, 'month' => (int)$month, 'day' => (int)$day);
+    $gender = ($fields['_Gender0'] == 'Male' ? 0 : 1);
+    $form = array();   
     $form['student'] = array(
     	'#type' => 'fieldset',
     	'#title' => 'Student Information',
@@ -247,7 +248,14 @@ function infusionsoft_student_form($form, &$form_state, $id){
         '#title' => t('Birthday'),
         '#required' => TRUE,
         '#default_value' => $date,
-    );    
+    );
+    $form['student']['_Gender0'] = array(
+        '#type' => 'radios',
+        '#title' => t('Gender'),
+        '#required' => TRUE,
+	'#default_value' => $gender,
+        '#options' => array('Male', 'Female'),
+    );      
     $form['student']['_StudentLevel'] = array(
         '#type' => 'radios',
         '#title' => t('Level'),
@@ -309,7 +317,7 @@ function infusionsoft_teacher_form_submit($form, &$form_state){
     drupal_set_message("Your information has been updated!");
 }
 function infusionsoft_student_form_submit($form, &$form_state){
-	$birthday = $form_state['values']['Birthday'];
+    $birthday = $form_state['values']['Birthday'];
     $infusionsoftContact = new InfusionsoftContact($form_state['values']['Id']);
     $saveFields = array('Id','FirstName', 'LastName', '_StudentLevel', '_StudentStatus', '_ReasonforDrop', '_GraduationYear');
     foreach($saveFields as $fieldName){
@@ -318,6 +326,7 @@ function infusionsoft_student_form_submit($form, &$form_state){
         }
     }
     $infusionsoftContact->fields['Birthday'] = $birthday['month'] . '/' . $birthday['day'] . '/' . $birthday['year'];
+    $infusionsoftContact->fields['_Gender0'] = ($form_state['values']['_Gender0'] == 0 ? "Male" : "Female");
     $infusionsoftContact->save();
     drupal_set_message($form_state['values']['FirstName'] . ' ' . $form_state['values']['LastName'] ."'s information has been updated");
 }
