@@ -1,0 +1,39 @@
+<?php
+function infusionsoft_schema() {
+
+
+// This is just a start: storing the infusionsoft application name and the api Key to use throughout the site//
+
+  $schema['infusionsoft'] = array(
+    'description' => 'Stores infusionsoft settings.',
+    'fields' => array(
+      'sid'  => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique settings ID.',
+      ),
+      'apikey' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 255,
+        'default' => '',
+        'description' => "Api Key for the infusionsoft application",
+      ),
+      'appname' => array(
+        'type' => 'varchar',
+        'length' => 500,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'This is the application name (Ex. example.infusionsoft.com)',
+      )
+
+    ),
+    'primary key' => array('sid'),
+    'indexes' => array(
+      'apikey'    => array('apikey'),
+      'appname' => array('appname'),
+    ),
+  );
+
+  return $schema;
+}

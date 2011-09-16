@@ -1,0 +1,224 @@
+<?php
+
+require_once( 'InfusionsoftContact.inc' );
+
+function infusionsoft_admin_paths_alter(&$paths) {
+  $paths['infusionsoft'] = TRUE;
+  $paths['infusionsoft/*'] = TRUE;  
+  return $paths;
+}
+function infusionsoft_permission() {
+  return array(
+    'administer settings' => array(
+      'title' => t('Administer Settings'), 
+      'description' => t('Administer infusionsoft settings.'),
+    ),
+    'administer contacts' => array(
+      'title' => t('Administer Contacts'), 
+      'description' => t('Administer infusionsoft contacts.'),
+    ),
+    'submit application' => array(
+      'title' => t('Submit Teacher Application'), 
+      'description' => t('Allow prospective teachers apply to become a LPM Teacher.'),
+    ),     
+  );
+}
+
+// this is an implementation of hook_menu. 
+    
+function infusionsoft_menu() {    
+	$items['infusionsoft'] = array(
+	  'title' => 'Student Roster',
+	  'description' => 'List of your students',	  	
+	  'access arguments' => array('administer contacts'), 
+	  'weight' => 110,    	
+	  'page callback' => 'infusionsoft_dashboard',
+	  'file' => 'infusionsoft_edit_contact.inc',
+	  // page callback, etc. need to be added here
+	);
+	// Make "Global settings" the main tab on the "Foo settings" page
+	$items['infusionsoft/dashboard'] = array(
+	  'title' => 'Roster',
+	  'type' => MENU_DEFAULT_LOCAL_TASK,
+	  'access arguments' => array('administer contacts'), 
+	  'weight' => 0,
+    	);
+	 $items['infusionsoft/account'] = array(
+	  'title' => 'Account Settings',
+	  'page callback' => 'drupal_get_form',
+	  'page arguments'  => array('infusionsoft_settings_form'),    
+	  'access arguments' => array('administer settings'), 
+	  'type' => MENU_LOCAL_TASK,
+	  'weight' => 1,	  	
+	);
+	$items['infusionsoft/student'] = array(
+	  'title' => 'Edit contact record',
+	  'description' => 'You can update you contact record.',	  	
+	  'access arguments' => array('administer contacts'), 
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('infusionsoft_student_form', 2),
+	  'file' => 'infusionsoft_edit_contact.inc',
+	  'type' => MENU_CALLBACK,		
+	);
+	$items['infusionsoft/parent'] = array(
+	  'title' => 'Edit contact record',
+	  'description' => 'You can update you contact record.',
+	  'access arguments' => array('administer contacts'), 
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('infusionsoft_parent_form', 2),
+	  'file' => 'infusionsoft_edit_contact.inc',
+	  'type' => MENU_CALLBACK,
+	);
+	$items['infusionsoft/add/student'] = array(
+	  'title' => 'Add New Student',
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('infusionsoft_add_student_parent'),
+	  'access callback' => TRUE,
+	  'description' => 'Add New Student',
+	  'type' => MENU_LOCAL_ACTION,
+	  'file' => 'infusionsoft_add_student.inc',
+  );
+	 $items['infusionsoft/roster-issues'] = array(
+	  'title' => 'Roster Issues',
+	  'page callback' => 'infusionsoft_roster_error', 
+	  'access callback' => TRUE,	
+	  'file' => 'infusionsoft_edit_contact.inc',	       
+	  'type' => MENU_CALLBACK,  	
+	);  	
+  return $items;
+}
+
+
+function infusionsoft_roster_error(){
+	$id = get_current_teacher_id();
+	if($id !== ""){
+	$output = "Fill out this form and we will get back with you shortly";
+	
+	return $output;
+	}
+	return	drupal_set_message("Your email doesn't match to any email we have on file. Please fill out this form then contact your Team Lead");
+}
+
+function infusionsoft_settings_form(){
+	$apikey = db_query("SELECT apikey FROM {infusionsoft}") ->fetchField();
+	$appname = db_query("SELECT appname FROM {infusionsoft}") ->fetchField();
+	
+	$form = array();
+  	$form['explanation'] = array(
+    	'#markup' => "<div>" . t("Please enter your api key and your application name.") . "</div>",
+  	);
+  	
+  	$form['infusionsoft'] = array(
+  	'#type' => 'fieldset',
+  	'#title' => 'Infusionsoft API Settings',
+  	'#collapsible' => TRUE,
+  );
+  $form['infusionsoft']['apikey'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Enter your api key"),
+    '#default_value' => $apikey, 
+    '#required' => TRUE,
+  );
+  $form['infusionsoft']['appname'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $appname, 
+    '#title' => t("Access URL"),
+    '#required' => TRUE,
+    '#description' => t("Enter your Access URL (Ex: https://example.infusionsoft.com/api/xmlrpc)"),
+  );
+
+  // Include two buttons, each of them calling a different method.
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t("Submit"),
+    '#submit' => array('infusionsoft_settings_submit'),
+  );
+	
+	return $form;
+}
+
+function infusionsoft_settings_submit($form, &$form_state){
+  db_insert('infusionsoft')
+       ->fields(array('apikey' => $form_state['values']['apikey'], 'appname' => $form_state['values']['appname']))
+       ->execute();	
+	drupal_set_message(t('Your settings have been saved.'));
+}
+
+//this is an implementation of form_api I create the simple form to submit to infusionsoft
+
+
+function infusionsoft_dashboard() {
+	$id = get_current_teacher_id();
+
+	if($id !== ""){
+	$output = drupal_render(drupal_get_form('infusionsoft_teacher_form'));
+	$output .= infusionsoft_get_students($id);
+
+	return $output;
+	}
+return drupal_goto("infusionsoft/roster-issues");	
+}
+
+
+function infusionsoft_get_students($teacher_id){
+	
+
+    $tableColumns = array('Name','Gender', 'Birthday', 'Level', 'Status', 'Parent' );
+    $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop');
+    $infusionsoft_data = new InfusionsoftData();
+
+    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student'), $fieldsToReturn);
+    $html = '<h1>Student Roster is still under development. If you are having issues please fill out '. l('this form', 'infusionsoft/roster-issues', array('query' => array('destination' => 'infusionsoft'))).'</h1>';
+    //TODO ADD LEVEL 2, LEVEL 3 TABLES $html .= '<div class="student-level-links"';
+
+    //Infusionsoft doesn't return fields in the order you specify, so we need to re-order them before putting them into the table...
+    $filteredRecords = array();
+    foreach($infusionsoft_results as $result){
+        $newArray = array();
+        foreach($tableColumns as $fieldName){
+            if($fieldName == 'Name' && isset($result['FirstName']) && isset($result['LastName'])){
+                $newArray[$fieldName] = l($result['FirstName'] . ' ' .  $result['LastName'], 'infusionsoft/student/' . $result['Id']);
+            }elseif($fieldName=='Gender' && isset($result['_Gender0'])) {
+	      $newArray[$fieldName] = $result['_Gender0'];
+	    }elseif($fieldName=='Birthday' && isset($result['Birthday'])) {
+	      $newArray[$fieldName] = date('D, M jS Y',strtotime($result['Birthday']));
+	    }elseif($fieldName=='Level' && isset($result['_StudentLevel'])) {
+	      $newArray[$fieldName] = $result['_StudentLevel'];
+	    }elseif($fieldName=='Status' && isset($result['_StudentStatus'])) {
+	      $newArray[$fieldName] = $result['_StudentStatus'];
+	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
+                $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
+            } else{
+                $newArray[$fieldName] = '';
+            }
+        }
+        $filteredRecords[] = $newArray;
+    }
+
+    $table_variables = array(
+        'header' => array(
+            'Name',
+	    'Gender',
+            'Birthday',
+	    'Level',
+	    'Status',
+	    'Parent'
+        ),
+        'rows' => $filteredRecords,
+        'attributes' => array('id' => array('students')),
+        'caption' => '',
+        'colgroups' => array(),
+        'sticky' => '',
+        'empty' => ''
+    );
+    
+    $html .= theme_table($table_variables);
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+	return $html;
+}
+
+function infusionsoft_get_parents($parent_id){
+    $infusionsoft_data = new InfusionsoftData();
+    $infusionsoft_results = $infusionsoft_data->query('Contact', array('_ParentID' => $parent_id));
+	return print_r($infusionsoft_results, true);
+}

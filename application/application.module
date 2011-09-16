@@ -1,0 +1,13 @@
+<?php   
+function application_menu() {    
+        $items = array();
+	$items['teacher/application'] = array(
+            'title' => 'Teacher Application',
+            'page callback' => 'drupal_get_form',
+            'page arguments'  => array('teacher_application_form'),    
+            'access arguments' => array('submit application'),
+            'file' => 'application.inc',         
+            'weight' => 1,	  	
+	);
+  return $items;
+}

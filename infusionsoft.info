@@ -1,0 +1,14 @@
+name = Infusionsoft 
+description = This is an example of how to use drupal to communicate with infusionsoft using XML-RPC.
+package = Infusionsoft  
+core = 7.x
+
+files[] = infusionsoft.module
+files[] = infusionsoft.install
+files[] = InfusionsoftData.inc
+files[] = infusionsoft_edit_contact.inc
+files[] = infusionsoft_add_student.inc
+files[] = infusionsoft_util.inc
+files[] = js/infusionsoft.js
+
+

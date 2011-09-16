@@ -1,0 +1,10 @@
+name = Teacher Application
+description = The teacher application form.
+package = Infusionsoft  
+core = 7.x
+
+files[] = application.module
+files[] = application.inc
+
+
+
