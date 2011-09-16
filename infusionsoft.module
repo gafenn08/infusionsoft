@@ -253,7 +253,7 @@ function infusionsoft_get_level_one_students(){
 	    'Parent'
         ),
         'rows' => $filteredRecords,
-        'attributes' => array('id' => array('students')),
+        'attributes' => array('class' => array('students')),
         'caption' => '',
         'colgroups' => array(),
         'sticky' => '',
@@ -305,7 +305,7 @@ function infusionsoft_get_level_two_students(){
 	    'Parent'
         ),
         'rows' => $filteredRecords,
-        'attributes' => array('id' => array('students')),
+        'attributes' => array('class' => array('students')),
         'caption' => '',
         'colgroups' => array(),
         'sticky' => '',
@@ -355,7 +355,7 @@ function infusionsoft_get_level_three_students(){
 	    'Parent'
         ),
         'rows' => $filteredRecords,
-        'attributes' => array('id' => array('students')),
+        'attributes' => array('class' => array('students')),
         'caption' => '',
         'colgroups' => array(),
         'sticky' => '',
@@ -405,7 +405,7 @@ function infusionsoft_get_graduated_students(){
 	    'Parent'
         ),
         'rows' => $filteredRecords,
-        'attributes' => array('id' => array('students')),
+        'attributes' => array('class' => array('students')),
         'caption' => '',
         'colgroups' => array(),
         'sticky' => '',
@@ -458,7 +458,7 @@ function infusionsoft_get_dropped_students(){
 	    'Parent'
         ),
         'rows' => $filteredRecords,
-        'attributes' => array('id' => array('students')),
+        'attributes' => array('class' => array('students')),
         'caption' => '',
         'colgroups' => array(),
         'sticky' => '',
