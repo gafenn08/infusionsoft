@@ -213,11 +213,15 @@ function infusionsoft_student_form($form, &$form_state, $id){
     $contact_record = new InfusionsoftContact();
     $contact = $contact_record->loadContactByID($id);
     $fields = $contact_record->fields;
+    if($fields['Birthday']){
     $year = $fields['Birthday']->year;
     $month = $fields['Birthday']->month;
   	$day = $fields['Birthday']->day;
    // dsm($fields['Birthday']);
     $date = array('year' => (int)$year, 'month' => (int)$month, 'day' => (int)$day);
+    }else{
+        $date = "";
+    }
     $gender = ($fields['_Gender0'] == 'Male' ? 0 : 1);
     $form = array();   
     $form['student'] = array(
