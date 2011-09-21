@@ -239,7 +239,7 @@ function infusionsoft_get_level_one_students(){
 	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
                 $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
             } else{
-                $newArray[$fieldName] = '';
+                $newArray[$fieldName] = 'N/A';
             }
         }
         $filteredRecords[] = $newArray;
@@ -261,7 +261,7 @@ function infusionsoft_get_level_one_students(){
     );
     
     $html .= theme_table($table_variables);
-
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
 	return $html;
 }
 
@@ -291,7 +291,7 @@ function infusionsoft_get_level_two_students(){
 	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
                 $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
             } else{
-                $newArray[$fieldName] = '';
+                $newArray[$fieldName] = 'N/A';
             }
         }
         $filteredRecords[] = $newArray;
@@ -313,7 +313,7 @@ function infusionsoft_get_level_two_students(){
     );
     
     $html .= theme_table($table_variables);
-
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
 	return $html;
 }
 function infusionsoft_get_level_three_students(){
@@ -341,7 +341,7 @@ function infusionsoft_get_level_three_students(){
 	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
                 $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
             } else{
-                $newArray[$fieldName] = '';
+                $newArray[$fieldName] = 'N/A';
             }
         }
         $filteredRecords[] = $newArray;
@@ -363,14 +363,14 @@ function infusionsoft_get_level_three_students(){
     );
     
     $html .= theme_table($table_variables);
-
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
 	return $html;
 }
 function infusionsoft_get_graduated_students(){
     $teacher_id = get_current_teacher_id();
 
-    $tableColumns = array('Name','Gender', 'Birthday','Parent' );
-    $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop');
+    $tableColumns = array('Name','Gender', 'Birthday', 'Graduation Year','Parent' );
+    $fieldsToReturn = array('Id', 'FirstName', 'LastName', 'Birthday', '_ParentID', '_Parent', '_Gender0', '_StudentLevel', '_StudentStatus', '_ReasonforDrop', '_GraduationYear');
     $infusionsoft_data = new InfusionsoftData();
 
     $infusionsoft_results = $infusionsoft_data->query('Contact', array('_TeacherID' => $teacher_id, '_ContactType0' => 'Student', '_StudentLevel' => 'Graduated','_StudentStatus' => 'Graduated'), $fieldsToReturn);
@@ -388,10 +388,12 @@ function infusionsoft_get_graduated_students(){
 	      $newArray[$fieldName] = $result['_Gender0'];
 	    }elseif($fieldName=='Birthday' && isset($result['Birthday'])) {
 	      $newArray[$fieldName] = date('D, M jS Y',strtotime($result['Birthday']));
+	    }elseif($fieldName=='Graduation Year' && isset($result['_GraduationYear'])) {
+	      $newArray[$fieldName] = $result['_GraduationYear'];
 	    }elseif($fieldName=='Parent' && isset($result['_ParentID'])){
                 $newArray[$fieldName] = l($result['_Parent'], 'infusionsoft/parent/' . $result['_ParentID']);
             } else{
-                $newArray[$fieldName] = '';
+                $newArray[$fieldName] = 'N/A';
             }
         }
         $filteredRecords[] = $newArray;
@@ -402,6 +404,7 @@ function infusionsoft_get_graduated_students(){
             'Name',
 	    'Gender',
             'Birthday',
+	    'Graduation Year',
 	    'Parent'
         ),
         'rows' => $filteredRecords,
@@ -413,7 +416,7 @@ function infusionsoft_get_graduated_students(){
     );
     
     $html .= theme_table($table_variables);
-
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
 	return $html;
 }
 function infusionsoft_get_dropped_students(){
@@ -443,7 +446,7 @@ function infusionsoft_get_dropped_students(){
             }elseif($fieldName=='Reason For Drop' && isset($result['_ReasonforDrop'])){
                $newArray[$fieldName] = $result['_ReasonforDrop'];
             }else{
-                $newArray[$fieldName] = '';
+                $newArray[$fieldName] = 'N/A';
             }
         }
         $filteredRecords[] = $newArray;
@@ -457,7 +460,7 @@ function infusionsoft_get_dropped_students(){
 	    'Reason For Drop',
 	    'Parent'
         ),
-        'rows' => $filteredRecords,
+        'rows' => $filteredRecords, 
         'attributes' => array('class' => array('students')),
         'caption' => '',
         'colgroups' => array(),
@@ -466,7 +469,7 @@ function infusionsoft_get_dropped_students(){
     );
     
     $html .= theme_table($table_variables);
-
+    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
 	return $html;
 }
 function infusionsoft_get_parents($parent_id){
