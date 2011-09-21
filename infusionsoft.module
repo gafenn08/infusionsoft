@@ -261,7 +261,7 @@ function infusionsoft_get_level_one_students(){
     );
     
     $html .= theme_table($table_variables);
-    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+
 	return $html;
 }
 
@@ -313,7 +313,7 @@ function infusionsoft_get_level_two_students(){
     );
     
     $html .= theme_table($table_variables);
-    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+
 	return $html;
 }
 function infusionsoft_get_level_three_students(){
@@ -363,7 +363,7 @@ function infusionsoft_get_level_three_students(){
     );
     
     $html .= theme_table($table_variables);
-    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+
 	return $html;
 }
 function infusionsoft_get_graduated_students(){
@@ -413,7 +413,7 @@ function infusionsoft_get_graduated_students(){
     );
     
     $html .= theme_table($table_variables);
-    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+
 	return $html;
 }
 function infusionsoft_get_dropped_students(){
@@ -466,7 +466,7 @@ function infusionsoft_get_dropped_students(){
     );
     
     $html .= theme_table($table_variables);
-    drupal_add_js(drupal_get_path("module", "infusionsoft") . "/infusionsoft.js");
+
 	return $html;
 }
 function infusionsoft_get_parents($parent_id){
