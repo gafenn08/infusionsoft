@@ -217,8 +217,7 @@ function infusionsoft_student_form($form, &$form_state, $id){
     $month = $fields['Birthday']->month;
   	$day = $fields['Birthday']->day;
    // dsm($fields['Birthday']);
-    $date = (isset($fields['Birthday']) ? array('year' => (int)$year, 'month' => (int)$month, 'day' => (int)$day) : '');
-    
+    $date = array('year' => (int)$year, 'month' => (int)$month, 'day' => (int)$day);
     $gender = ($fields['_Gender0'] == 'Male' ? 0 : 1);
     $form = array();   
     $form['student'] = array(
